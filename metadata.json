@@ -1,0 +1,5 @@
+{
+  "name": "Sistema de Cozinha Panificação Lima Rocha",
+  "description": "Uma interface de sistema de cozinha para gerenciar pedidos em tempo real, otimizada para tablets. Exibe pedidos em colunas de status, emite alertas para novos pedidos e permite que a equipe da cozinha atualize o status do preparo.",
+  "requestFramePermissions": []
+}
