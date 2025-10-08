@@ -18,9 +18,14 @@ export interface Order {
   status: OrderStatus;
   items: OrderItem[];
   createdAt: Date;
+  data_agendamento?: string;
+  turno?: TurnosEntrega;
+  horario_agendamento?: string;
 }
 
 // Tipos para integração com Supabase
+export type TurnosEntrega = 'manha' | 'tarde' | 'noite';
+
 export interface SupabaseOrder {
   id: number;
   customer_name: string;
@@ -32,6 +37,9 @@ export interface SupabaseOrder {
   notes?: string;
   created_at: string;
   updated_at: string;
+  data_agendamento?: string;
+  turno?: TurnosEntrega;
+  horario_agendamento?: string;
 }
 
 export interface SupabaseOrderItem {

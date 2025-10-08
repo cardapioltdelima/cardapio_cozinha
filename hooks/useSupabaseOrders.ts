@@ -50,6 +50,9 @@ export const useSupabaseOrders = () => {
       customerName: supabaseOrder.customer_name,
       status: convertStatus(supabaseOrder.status),
       createdAt: new Date(supabaseOrder.created_at),
+      data_agendamento: supabaseOrder.data_agendamento,
+      turno: supabaseOrder.turno,
+      horario_agendamento: supabaseOrder.horario_agendamento,
       items: (orderItems || [])
         .map(item => {
           if (!item.products) {
