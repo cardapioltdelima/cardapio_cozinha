@@ -139,33 +139,21 @@ export const useSupabaseOrders = () => {
   useEffect(() => {
     fetchOrders();
 
-    // Subscription para mudanças na tabela orders
+    const handleChanges = (payload: any) => {
+      console.log('Change received!', payload);
+      fetchOrders();
+    };
+
     const ordersSubscription = supabase
       .channel('orders-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'orders' },
-        () => {
-          fetchOrders(); // Recarregar pedidos quando houver mudanças
-        }
-      )
-      .subscribe();
-
-    // Subscription para mudanças na tabela order_items
-    const orderItemsSubscription = supabase
-      .channel('order-items-changes')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'order_items' },
-        () => {
-          fetchOrders(); // Recarregar pedidos quando houver mudanças nos itens
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, handleChanges)
       .subscribe();
 
     return () => {
-      ordersSubscription.unsubscribe();
-      orderItemsSubscription.unsubscribe();
+      supabase.removeChannel(ordersSubscription);
     };
   }, [fetchOrders]);
+
 
   return {
     orders,

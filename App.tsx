@@ -1,15 +1,31 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Order, OrderStatus } from './types';
 import KitchenDisplay from './components/KitchenDisplay';
 import OrderDetailModal from './components/OrderDetailModal';
 import { useSupabaseOrders } from './hooks/useSupabaseOrders';
 
 const App: React.FC = () => {
-    const { orders, loading, error, updateOrderStatus } = useSupabaseOrders();
+    const { orders, loading, error, updateOrderStatus, refetch } = useSupabaseOrders();
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
     const [notification, setNotification] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (orders.length > 0) {
+            const currentOrderIds = new Set(orders.map(o => o.id));
+            const prevOrderIds = new Set(sessionStorage.getItem('orderIds')?.split(','));
+
+            const newOrders = [...currentOrderIds].filter(id => !prevOrderIds.has(id));
+            if (newOrders.length > 0) {
+                setNewOrderIds(prev => new Set([...prev, ...newOrders]));
+                setNotification(`${newOrders.length} novo(s) pedido(s) recebido(s)!`);
+                setTimeout(() => setNotification(null), 5000);
+            }
+
+            sessionStorage.setItem('orderIds', [...currentOrderIds].join(','));
+        }
+    }, [orders]);
 
     const handleUpdateOrderStatus = useCallback(async (orderId: string, newStatus: OrderStatus) => {
         const success = await updateOrderStatus(orderId, newStatus);
@@ -85,11 +101,19 @@ const App: React.FC = () => {
                     {notification}
                 </div>
             )}
-            <header className="p-4 bg-slate-800/50 backdrop-blur-sm sticky top-0 z-10 shadow-md">
-                <h1 className="text-3xl font-bold text-amber-400">
-                    Panificação Lima Rocha - Sistema da Cozinha
-                </h1>
-                <p className="text-slate-400">Pedidos em tempo real • {orders.length} pedidos</p>
+            <header className="p-4 bg-slate-800/50 backdrop-blur-sm sticky top-0 z-10 shadow-md flex flex-wrap justify-between items-center">
+                <div>
+                    <h1 className="text-3xl font-bold text-amber-400">
+                        Panificação Lima Rocha - Sistema da Cozinha
+                    </h1>
+                    <p className="text-slate-400">Pedidos em tempo real • {orders.length} pedidos</p>
+                </div>
+                <button
+                    onClick={() => refetch()}
+                    className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded mt-2 sm:mt-0"
+                >
+                    Atualizar Pedidos
+                </button>
             </header>
             <main className="p-4">
                 <KitchenDisplay
